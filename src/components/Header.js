@@ -33,7 +33,27 @@ const socials = [
 ];
 
 const Header = () => {
-  const handleClick = (anchor) => () => {
+  const ref = useRef();
+  const [value, setValue] = React.useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > ref.current) {
+        setValue(-200);
+      }
+      if (window.scrollY < ref.current) {
+        setValue(0);
+      }
+      ref.current = window.scrollY;
+    }
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    }
+  },[]);
+
+  const handleClick = (anchor) => (e) => {
+    e.preventDefault();
     const id = `${anchor}-section`;
     const element = document.getElementById(id);
     if (element) {
@@ -41,6 +61,11 @@ const Header = () => {
         behavior: "smooth",
         block: "start",
       });
+    }
+    if (anchor === "projects") {
+      window.location.hash = "projects";
+    } else if (anchor === "contactme") {
+      window.location.hash = "contact-me";
     }
   };
 
@@ -50,7 +75,7 @@ const Header = () => {
       top={0}
       left={0}
       right={0}
-      translateY={0}
+      transform={`translateY(${value}px)`}
       transitionProperty="transform"
       transitionDuration=".3s"
       transitionTimingFunction="ease-in-out"
@@ -64,11 +89,20 @@ const Header = () => {
           alignItems="center"
         >
           <nav>
-            {/* Add social media links based on the `socials` data */}
+            {
+              <HStack spacing={8}>
+                {
+                  socials.map((social) => {
+                    return <a key={social.url} href={social.url}><FontAwesomeIcon icon={social.icon} size="2x"></FontAwesomeIcon></a>;
+                  })
+                }
+              </HStack>
+            }
           </nav>
           <nav>
             <HStack spacing={8}>
-              {/* Add links to Projects and Contact me section */}
+              <a key={ "projects-section" } href="#projects-section" onClick={handleClick("projects")}>Projects</a>
+              <a key={ "contactme-section" } href="#contactme-section"  onClick={handleClick("contactme")}>Contact Me</a> 
             </HStack>
           </nav>
         </HStack>
